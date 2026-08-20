@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>尺码推荐工具 - 运动户外男装</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#333;min-height:100vh}
+.header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:20px;text-align:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.header h1{font-size:22px;margin-bottom:4px}
+.header p{font-size:13px;opacity:.85}
+.container{max-width:960px;margin:0 auto;padding:16px}
+.step{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.step-title{font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.step-num{background:#667eea;color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.cat-card{border:2px solid #e8e8e8;border-radius:10px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa}
+.cat-card:hover{border-color:#667eea;background:#f0edff;transform:translateY(-2px)}
+.cat-card.active{border-color:#667eea;background:#667eea;color:#fff}
+.cat-card.active .cat-desc{color:rgba(255,255,255,.8)}
+.cat-icon{font-size:32px;margin-bottom:6px}
+.cat-name{font-size:14px;font-weight:600}
+.cat-desc{font-size:11px;color:#999;margin-top:3px;line-height:1.3}
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.style-card{border:2px solid #e8e8e8;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;background:#fff}
+.style-card:hover{border-color:#764ba2;background:#f8f0ff;transform:translateY(-2px)}
+.style-card.active{border-color:#764ba2;background:#764ba2;color:#fff}
+.style-name{font-size:14px;font-weight:600}
+.style-sizes{font-size:11px;color:#999;margin-top:4px}
+.style-card.active .style-sizes{color:rgba(255,255,255,.8)}
+.size-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.size-chip{padding:10px 20px;border:2px solid #e0e0e0;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;background:#fff;color:#555}
+.size-chip:hover{border-color:#667eea;color:#667eea}
+.size-chip.active{background:#667eea;color:#fff;border-color:#667eea;transform:scale(1.05)}
+.result{display:none}
+.result.show{display:block;animation:fadein .3s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.result-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.result-header{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:16px 20px}
+.result-header h3{font-size:18px;margin-bottom:4px}
+.result-header .meta{font-size:13px;opacity:.85}
+.size-table{width:100%;border-collapse:collapse}
+.size-table th{background:#f5f5f5;padding:10px 8px;font-size:13px;color:#666;border-bottom:2px solid #e0e0e0;text-align:center}
+.size-table th.highlight{background:#fff3cd;color:#856404}
+.size-table td{padding:10px 8px;text-align:center;border-bottom:1px solid #f0f0f0;font-size:14px}
+.size-table td:first-child{font-weight:600;color:#555;background:#fafafa}
+.size-table td.highlight{background:#fff8e1;font-weight:700;color:#856404}
+.size-table tr:last-child td{border-bottom:none}
+.tip-box{background:#fff8e1;border-left:4px solid #ffc107;padding:12px 16px;margin-top:12px;border-radius:0 8px 8px 0;font-size:13px;color:#856404;line-height:1.6}
+.jump-box{margin-top:14px}
+.jump-box summary{cursor:pointer;font-weight:600;color:#667eea;font-size:14px;padding:8px 0}
+.jump-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.jump-table th{background:#e8eaf6;padding:6px 4px;color:#3f51b5;border:1px solid #c5cae9;text-align:center}
+.jump-table td{padding:6px 4px;text-align:center;border:1px solid #e8e8e8}
+.jump-table td:first-child{font-weight:600;background:#f5f5f5}
+.jump-table td.zero{color:#999}
+.back-btn{display:inline-block;margin-top:12px;padding:8px 20px;background:#667eea;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px}
+.back-btn:hover{background:#5568d3}
+.hidden{display:none!important}
+.empty{text-align:center;padding:30px;color:#ccc;font-size:14px}
+.note-box{background:#e8f5e9;border-left:4px solid #4caf50;padding:10px 14px;margin-top:10px;border-radius:0 6px 6px 0;font-size:12px;color:#2e7d32}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;margin-right:8px;padding:8px 18px;background:#4caf50;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;transition:all .2s}
+.copy-btn:hover{background:#43a047;transform:translateY(-1px)}
+.copy-btn.copied{background:#2e7d32}
+.btn-row{display:flex;flex-wrap:wrap;gap:0;align-items:center}
+.comment-section{background:#fff;border-radius:12px;padding:20px;margin-top:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.comment-section h2{font-size:18px;font-weight:700;margin-bottom:6px;color:#333;display:flex;align-items:center;gap:8px}
+.comment-section .subtitle{font-size:13px;color:#888;margin-bottom:16px;line-height:1.5}
+.comment-form{background:#f8f9fa;border-radius:10px;padding:16px;margin-bottom:16px}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:4px}
+.form-row label .required{color:#e53935}
+.form-input{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:#667eea}
+.form-select{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;outline:none;background:#fff}
+.form-textarea{width:100%;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;outline:none;min-height:70px;resize:vertical;font-family:inherit}
+.form-hint{font-size:11px;color:#aaa;margin-top:3px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.submit-btn{width:100%;padding:10px;background:#667eea;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:4px}
+.submit-btn:hover{background:#5568d3}
+.comment-list{margin-top:10px}
+.comment-item{background:#fff;border:1px solid #eee;border-radius:10px;padding:14px;margin-bottom:10px;position:relative}
+.comment-item .ci-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.comment-item .ci-store{font-weight:700;color:#667eea;font-size:14px}
+.comment-item .ci-time{font-size:11px;color:#bbb}
+.comment-item .ci-body{font-size:13px;color:#555;line-height:1.6;white-space:pre-wrap}
+.comment-item .ci-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.ci-tag{background:#e8eaf6;color:#3f51b5;padding:2px 8px;border-radius:4px;font-size:11px}
+.ci-tag.green{background:#e8f5e9;color:#2e7d32}
+.ci-tag.orange{background:#fff3e0;color:#e65100}
+.ci-copy{font-size:12px;color:#667eea;cursor:pointer;margin-top:6px;display:inline-block}
+.ci-copy:hover{text-decoration:underline}
+.ci-del{font-size:12px;color:#e53935;cursor:pointer;margin-top:6px;margin-left:12px;display:inline-block}
+.empty-comments{text-align:center;padding:20px;color:#ccc;font-size:13px}
+.copy-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:10px 24px;border-radius:8px;font-size:14px;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none}
+.copy-toast.show{opacity:1}
+.img-preview{margin-top:8px;max-width:120px;max-height:120px;border-radius:6px;border:1px solid #ddd}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>📏 尺码推荐工具</h1>
+<p>运动户外男装 · 选择款式查看版师推荐尺码</p>
+</div>
+<div class="container">
+
+<div class="step" id="step1">
+<div class="step-title"><span class="step-num">1</span>选择服装大类</div>
+<div class="cat-grid" id="catGrid"></div>
+</div>
+
+<div class="step hidden" id="step2">
+<div class="step-title"><span class="step-num">2</span>选择版型款式</div>
+<div class="style-grid" id="styleGrid"></div>
+</div>
+
+<div class="step hidden" id="step3">
+<div class="step-title"><span class="step-num">3</span>选择目标尺码</div>
+<div class="size-grid" id="sizeGrid"></div>
+</div>
+
+<div class="result" id="result">
+<div class="result-card">
+<div class="result-header">
+<h3 id="resultTitle"></h3>
+<div class="meta" id="resultMeta"></div>
+</div>
+<div style="padding:16px 20px">
+<table class="size-table" id="resultTable"></table>
+<div class="tip-box">⚠️ <strong>重要提醒：</strong>胸围一定要前4后5，否则审版不通过！</div>
+<div class="note-box">💡 表格中空白表示该部位此尺码无数据，"领围"通常只有M码有参考值。</div>
+<div class="btn-row">
+<button class="copy-btn" id="copySizeBtn" onclick="copySizeData()">📋 一键复制尺码</button>
+<button class="back-btn" onclick="resetAll()">🔄 重新选择</button>
+</div>
+<details class="jump-box">
+<summary>📊 查看跳码规则（M码基准）</summary>
+<table class="jump-table" id="jumpTable"></table>
+</details>
+</div>
+</div>
+</div>
+
+<!-- 留言交流区 -->
+<div class="comment-section" id="commentSection">
+<h2>💬 没找到你的款式？留言告诉我们</h2>
+<p class="subtitle">如果上面的款式没有你要开的款，请在这里留言。说清楚你的需求（宽松还是修身、什么品类），附上参考图，对应买手会去对接版师要尺码，然后回复你。</p>
+<div class="comment-form">
+<div class="form-grid">
+<div class="form-row">
+<label>店铺ID <span class="required">*</span></label>
+<input type="text" class="form-input" id="cStoreId" placeholder="例如：123456789" maxlength="20">
+</div>
+<div class="form-row">
+<label>版型偏好 <span class="required">*</span></label>
+<select class="form-select" id="cFit">
+<option value="">请选择</option>
+<option value="修身">修身</option>
+<option value="常规">常规</option>
+<option value="宽松">宽松</option>
+<option value="落肩">落肩</option>
+<option value="不确定">不确定</option>
+</select>
+</div>
+</div>
+<div class="form-grid">
+<div class="form-row">
+<label>主要品类 <span class="required">*</span></label>
+<select class="form-select" id="cCategory">
+<option value="">请选择</option>
+<option value="短袖T恤">短袖T恤</option>
+<option value="长袖T恤">长袖T恤</option>
+<option value="Polo衫">Polo衫</option>
+<option value="背心">背心</option>
+<option value="短袖衬衫">短袖衬衫</option>
+<option value="长袖衬衫">长袖衬衫</option>
+<option value="卫衣">卫衣</option>
+<option value="西装马甲">西装马甲</option>
+<option value="西裤">西裤</option>
+<option value="短裤">短裤</option>
+<option value="卫裤">卫裤</option>
+<option value="梭织裤/工装裤">梭织裤/工装裤</option>
+<option value="其他">其他</option>
+</select>
+</div>
+<div class="form-row">
+<label>参考图片（可选）</label>
+<input type="file" class="form-input" id="cImage" accept="image/*" onchange="previewImage(this)">
+<img class="img-preview hidden" id="cImgPreview">
+</div>
+</div>
+<div class="form-row">
+<label>补充说明（可选）</label>
+<textarea class="form-textarea" id="cDesc" placeholder="例如：我要开一款速干运动短袖，面料有弹力，偏宽松风格，目标客群是欧美市场偏大码..."></textarea>
+<div class="form-hint">尽量说清楚面料弹性、目标市场、风格偏好等，方便版师精准推荐</div>
+</div>
+<button class="submit-btn" onclick="submitComment()">📝 提交留言</button>
+</div>
+<div class="comment-list" id="commentList"></div>
+</div>
+
+<div class="copy-toast" id="copyToast">✅ 已复制到剪贴板</div>
+
+</div>
+<script>
+var DATA = {"jump_rule": {"desc": "以M码为基准跳码。胸围一定要前4后5，否则审版不通过。", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "rows": {"前衣长": [-2, -2, -2, 0, 2, 2, 2, 2], "短袖袖长": [-0.5, -0.5, -0.5, 0, 0.5, 0.5, 0.5, 0.5], "长袖袖长": [-1.2, -1.2, -1.2, 0, 1.2, 1.2, 1.2, 1.2], "肩宽": [-1.5, -1.5, -1.5, 0, 1.8, 1.8, 1.8, 1.8], "胸围": [-4, -4, -4, 0, 5, 5, 5, 5], "短裤内长": [-0.3, -0.3, -0.3, 0, 0.3, 0.3, 0.3, 0.3], "长裤内长": [-0.8, -0.8, -0.8, 0, 0.8, 0.8, 0.6, 0.6], "前浪长": [-0.7, -0.7, -0.7, 0, 0.7, 0.7, 0.7, 0.7], "后浪长": [-0.8, -0.8, -0.8, 0, 0.8, 0.8, 0.8, 0.8], "橡筋腰围": [-3, -3, -3, 0, 4, 4, 4, 4], "常规腰围": [-4, -4, -4, 0, 5, 5, 5, 5], "臀围": [-4, -4, -4, 0, 5, 5, 5, 5]}}, "categories": [{"id": "tshirt_polo", "name": "短袖T恤/Polo", "icon": "👕", "desc": "短袖T恤、Polo衫", "styles": [{"name": "Polo", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围", "夹圈"], "data": {"肩宽": [42.5, 44, 45.5, 47, 48.8, 50.6, 52.4, 54.2], "胸围": [96, 100, 104, 108, 113, 118, 123, 128], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24], "领围": ["", "", 53, "", "", "", ""], "夹圈": ["", "", "", "", "", "", "", ""]}}, {"name": "中弹修身款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围", "夹圈"], "data": {"肩宽": [41.5, 43, 44.5, 46, 47.8, 49.6, 51.4, 53.2], "胸围": [90, 94, 98, 102, 107, 112, 117, 122], "前衣长": [64, 66, 68, 70, 72, 74, 76, 78], "袖长": [19.5, 20, 20.5, 21, 21.5, 22, 22.5, 23], "领围": ["", "", 53, "", "", "", ""], "夹圈": ["", "", "", "", "", "", "", ""]}}, {"name": "常规款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围", "夹圈"], "data": {"肩宽": [42.5, 44, 45.5, 47, 48.8, 50.6, 52.4, 54.2], "胸围": [96, 100, 104, 108, 113, 118, 123, 128], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25], "领围": ["", "", 53, "", "", "", ""], "夹圈": ["", "", "", "", "", "", "", ""]}}, {"name": "宽松款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围", "夹圈"], "data": {"肩宽": [47.5, 49, 50.5, 52, 53.8, 55.6, 57.4, 59.2], "胸围": [100, 104, 108, 112, 117, 122, 127, 132], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [21.5, 22, 22.5, 23, 23.5, 24, 24.5, 25], "领围": ["", "", 53, "", "", "", ""], "夹圈": ["", "", "", "", "", "", "", ""]}}]}, {"id": "long_tshirt_polo", "name": "长袖T恤/Polo", "icon": "🧥", "desc": "长袖T恤、长袖Polo", "styles": [{"name": "常规款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围", "夹圈"], "data": {"肩宽": [42.5, 44, 45.5, 47, 48.8, 50.6, 52.4, 54.2], "胸围": [96, 100, 104, 108, 113, 118, 123, 128], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [61, 62, 63, 64, 65, 66, 67, 68], "领围": ["", "", 52, "", "", "", ""], "夹圈": ["", "", "", "", "", "", "", ""]}}, {"name": "宽松款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围", "夹圈"], "data": {"肩宽": [47.5, 49, 50.5, 52, 53.8, 55.6, 57.4, 59.2], "胸围": [100, 104, 108, 112, 117, 122, 127, 132], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [57, 58, 59, 60, 61, 62, 63, 64], "领围": ["", "", 52, "", "", "", ""], "夹圈": ["", "", "", "", "", "", "", ""]}}]}, {"id": "vest", "name": "背心", "icon": "🎽", "desc": "运动背心、修身背心、宽松背心", "styles": [{"name": "高弹紧身背心", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["胸围", "前衣长"], "data": {"胸围": [80, 84, 88, 92, 97, 102, 107], "前衣长": [64, 66, 68, 70, 72, 74, 76]}}, {"name": "健身房修身背心", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["胸围", "前衣长"], "data": {"胸围": [84, 88, 92, 96, 101, 106, 111], "前衣长": [66, 68, 70, 72, 74, 76, 78]}}, {"name": "常规款背心", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["胸围", "前衣长"], "data": {"胸围": [94, 98, 102, 106, 111, 116, 121], "前衣长": [66, 68, 70, 72, 74, 76, 78]}}, {"name": "宽松款背心", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["胸围", "前衣长"], "data": {"胸围": [98, 102, 106, 110, 115, 120, 125, 130], "前衣长": [68, 70, 72, 74, 76, 78, 80, 82]}}]}, {"id": "short_sleeve_shirt", "name": "短袖衬衫", "icon": "👔", "desc": "有弹修身/常规/宽松落肩", "styles": [{"name": "有弹修身款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [43.5, 45, 46.5, 48, 49.8, 51.6, 53.4, 55.2], "胸围": [100, 104, 108, 112, 117, 122, 127, 132], "前衣长": [68, 70, 72, 74, 76, 78, 80, 82], "袖长": [20.5, 21, 21.5, 22, 22.5, 23, 23.5, 24]}}, {"name": "常规款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [44.5, 46, 47.5, 49, 50.8, 52.6, 54.4, 56.2], "胸围": [102, 106, 110, 114, 119, 124, 129, 134], "前衣长": [68, 70, 72, 74, 76, 78, 80, 82], "袖长": [22.5, 23, 23.5, 24, 24.5, 25, 25.5, 26]}}, {"name": "宽松落肩款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [47.5, 49, 50.5, 52, 53.8, 55.6, 57.4, 59.2], "胸围": [106, 110, 114, 118, 123, 128, 133, 138], "前衣长": [69, 71, 73, 75, 77, 79, 81, 83], "袖长": [23.5, 24, 24.5, 25, 25.5, 26, 26.5, 27]}}]}, {"id": "long_sleeve_shirt", "name": "长袖衬衫", "icon": "👚", "desc": "修身/无弹常规/宽松休闲", "styles": [{"name": "修身款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [43.5, 45, 46.5, 48, 49.8, 51.6, 53.4, 55.2], "胸围": [96, 100, 104, 108, 113, 118, 123, 128], "前衣长": [68, 70, 72, 74, 76, 78, 80, 82], "袖长": [62.5, 63, 63.5, 64, 64.5, 65, 65.5, 66]}}, {"name": "无弹常规款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [43.5, 45, 46.5, 48, 49.8, 51.6, 53.4, 55.2], "胸围": [96, 100, 104, 108, 113, 118, 123, 128], "前衣长": [68, 70, 72, 74, 76, 78, 80, 82], "袖长": [62.5, 63, 63.5, 64, 64.5, 65, 65.5, 66]}}, {"name": "宽松休闲款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [44.5, 46, 47.5, 49, 50.8, 52.6, 54.4, 56.2], "胸围": [98, 102, 106, 110, 115, 120, 125, 130], "前衣长": [69, 71, 73, 75, 77, 79, 81, 83], "袖长": [61.5, 62, 62.5, 63, 63.5, 64, 64.5, 65]}}]}, {"id": "vest_suit", "name": "西装马甲", "icon": "🦺", "desc": "西装马甲", "styles": [{"name": "西装马甲", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长"], "data": {"肩宽": [33.5, 35, 36.5, 38, 39.8, 41.6, 43.4, 45.2], "胸围": [94, 98, 102, 106, 111, 116, 121, 126], "前衣长": [59, 61, 63, 65, 67, 69, 71, 73]}}]}, {"id": "hoodie", "name": "卫衣", "icon": "🧶", "desc": "圆领/连帽/落肩/薄绒/修身", "styles": [{"name": "常规圆领", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围"], "data": {"肩宽": [44.5, 46, 47.5, 49, 50.8, 52.6, 54.4, 56.2], "胸围": [100, 104, 108, 112, 117, 122, 127, 132], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [63.5, 64, 64.5, 65, 65.5, 66, 66.5, 67], "领围": ["", "", 53, "", "", "", ""]}}, {"name": "常规连帽", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [44.5, 46, 47.5, 49, 50.8, 52.6, 54.4, 56.2], "胸围": [102, 106, 110, 114, 119, 124, 129, 134], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [62.5, 63, 63.5, 64, 64.5, 65, 65.5, 66]}}, {"name": "宽松圆领", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围"], "data": {"肩宽": [45.5, 47, 48.5, 50, 51.8, 53.6, 55.4, 57.2], "胸围": [104, 108, 112, 116, 121, 126, 131, 136], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [62.5, 63, 63.5, 64, 64.5, 65, 65.5, 66], "领围": ["", "", 53, "", "", "", ""]}}, {"name": "宽松连帽", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [45.5, 47, 48.5, 50, 51.8, 53.6, 55.4, 57.2], "胸围": [104, 108, 112, 116, 121, 126, 131, 136], "前衣长": [66, 68, 70, 72, 74, 76, 78, 80], "袖长": [60.5, 61, 61.5, 62, 62.5, 63, 63.5, 64]}}, {"name": "落肩款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长", "领围"], "data": {"肩宽": [49.5, 51, 52.5, 54, 55.8, 57.6, 59.4, 61.2], "胸围": [104, 108, 112, 116, 121, 126, 131, 136], "前衣长": [67, 69, 71, 73, 75, 77, 79, 81], "袖长": [58.5, 59, 59.5, 60, 60.5, 61, 61.5, 62], "领围": ["", "", 53, "", "", "", ""]}}, {"name": "薄绒常规款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [45.5, 47, 48.5, 50, 51.8, 53.6, 55.4], "胸围": [110, 114, 118, 122, 127, 132, 137], "前衣长": [66, 68, 70, 72, 74, 76, 78], "袖长": [63.5, 64, 64.5, 65, 65.5, 66, 66.5]}}, {"name": "薄绒落肩款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [59.5, 61, 62.5, 64, 65.8, 67.6, 69.4], "胸围": [118, 122, 126, 130, 135, 140, 145], "前衣长": [69, 71, 73, 75, 77, 79, 81], "袖长": [56.5, 57, 57.5, 58, 58.5, 59, 59.5]}}, {"name": "套头修身款", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["肩宽", "胸围", "前衣长", "袖长"], "data": {"肩宽": [41.5, 43, 44.5, 46, 47.8, 49.6, 51.4, 53.2], "胸围": [94, 98, 102, 106, 111, 116, 121, 126], "前衣长": [65, 67, 69, 71, 73, 75, 77, 79], "袖长": [63.5, 64, 64.5, 65, 65.5, 66, 66.5, 67]}}]}, {"id": "dress_pants", "name": "西裤", "icon": "👖", "desc": "修身西裤、常规西裤", "styles": [{"name": "修身西裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["常规腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"常规腰围": [72, 76, 80, 84, 89, 94, 99, 104], "臀围": [90, 94, 98, 102, 107, 112, 117, 122], "长裤内长": [73.6, 74.4, 75.2, 76, 76.8, 77.6, 78.2, 78.8], "前浪长": [26.9, 27.6, 28.3, 29, 29.7, 30.4, 31.1, 31.8], "后浪长": [36.6, 37.4, 38.2, 39, 39.8, 40.6, 41.4, 42.2]}}, {"name": "常规西裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["常规腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"常规腰围": [73, 77, 81, 85, 90, 95, 100, 105], "臀围": [94, 98, 102, 106, 111, 116, 121, 126], "长裤内长": [73.6, 74.4, 75.2, 76, 76.8, 77.6, 78.2, 78.8], "前浪长": [27.4, 28.1, 28.8, 29.5, 30.2, 30.9, 31.6, 32.3], "后浪长": [37.1, 37.9, 38.7, 39.5, 40.3, 41.1, 41.9, 42.7]}}]}, {"id": "shorts", "name": "短裤", "icon": "🩳", "desc": "沙滩裤、针织常规/宽松短裤", "styles": [{"name": "沙滩裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "短裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [98, 102, 106, 110, 115, 120, 125, 130], "短裤内长": [15.6, 16.4, 17.2, 18, 18.8, 19.6, 20.2, 20.8], "前浪长": [27.9, 28.6, 29.3, 30, 30.7, 31.4, 32.1, 32.8], "后浪长": [37.6, 38.4, 39.2, 40, 40.8, 41.6, 42.4, 43.2]}}, {"name": "针织常规短裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "短裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [96, 100, 104, 108, 113, 118, 123, 128], "短裤内长": [19.6, 20.4, 21.2, 22, 22.8, 23.6, 24.2, 24.8], "前浪长": [27.9, 28.6, 29.3, 30, 30.7, 31.4, 32.1, 32.8], "后浪长": [37.6, 38.4, 39.2, 40, 40.8, 41.6, 42.4, 43.2]}}, {"name": "针织宽松短裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "短裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [98, 102, 106, 110, 115, 120, 125, 130], "短裤内长": [19.6, 20.4, 21.2, 22, 22.8, 23.6, 24.2, 24.8], "前浪长": [27.9, 28.6, 29.3, 30, 30.7, 31.4, 32.1, 32.8], "后浪长": [37.6, 38.4, 39.2, 40, 40.8, 41.6, 42.4, 43.2]}}]}, {"id": "sweatpants", "name": "卫裤", "icon": "👖", "desc": "常规/宽松/有弹修身/无弹修身", "styles": [{"name": "常规款卫裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [94, 98, 102, 106, 111, 116, 121, 126], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2, 77.8], "前浪长": [27.9, 28.6, 29.3, 30, 30.7, 31.4, 32.1, 32.8], "后浪长": [37.6, 38.4, 39.2, 40, 40.8, 41.6, 42.4, 43.2]}}, {"name": "宽松款卫裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [96, 100, 104, 108, 113, 118, 123, 128], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2, 77.8], "前浪长": [27.9, 28.6, 29.3, 30, 30.7, 31.4, 32.1, 32.8], "后浪长": [37.6, 38.4, 39.2, 40, 40.8, 41.6, 42.4, 43.2]}}, {"name": "有弹修身款卫裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [90, 94, 98, 102, 107, 112, 117, 122], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2, 77.8], "前浪长": [27.4, 28.1, 28.8, 29.5, 30.2, 30.9, 31.6, 32.3], "后浪长": [36.6, 37.4, 38.2, 39, 39.8, 40.6, 41.4, 42.2]}}, {"name": "无弹修身款卫裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [92, 96, 100, 104, 109, 114, 119, 124], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2, 77.8], "前浪长": [26.9, 27.6, 28.3, 29, 29.7, 30.4, 31.1, 31.8], "后浪长": [37.1, 37.9, 38.7, 39.5, 40.3, 41.1, 41.9, 42.7]}}]}, {"id": "woven_pants", "name": "梭织裤/工装裤", "icon": "👖", "desc": "束脚裤/工装裤/修身梭织裤", "styles": [{"name": "常规梭织束脚裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89, 94], "臀围": [94, 98, 102, 106, 111, 116, 121, 126], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2, 77.8], "前浪长": [27.9, 28.6, 29.3, 30, 30.7, 31.4, 32.1, 32.8], "后浪长": [37.1, 37.9, 38.7, 39.5, 40.3, 41.1, 41.9, 42.7]}}, {"name": "宽松梭织束脚裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [62, 66, 70, 74, 79, 84, 89], "臀围": [98, 102, 106, 110, 115, 120, 125], "长裤内长": [73.6, 74.4, 75.2, 76, 76.8, 77.6, 78.2], "前浪长": [28.9, 29.6, 30.3, 31, 31.7, 32.4, 33.1], "后浪长": [37.6, 38.4, 39.2, 40, 40.8, 41.6, 42.4]}}, {"name": "工装裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["常规腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"常规腰围": [73, 77, 81, 85, 90, 95, 100], "臀围": [96, 100, 104, 108, 113, 118, 123], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2], "前浪长": [27.4, 28.1, 28.8, 29.5, 30.2, 30.9, 31.6], "后浪长": [36.6, 37.4, 38.2, 39, 39.8, 40.6, 41.4]}}, {"name": "修身梭织裤", "sizes": ["XXS", "XS", "S", "M", "L", "XL", "XXL"], "parts": ["橡筋腰围", "臀围", "长裤内长", "前浪长", "后浪长"], "data": {"橡筋腰围": [60, 64, 68, 72, 77, 82, 87], "臀围": [90, 94, 98, 102, 107, 112, 117], "长裤内长": [72.6, 73.4, 74.2, 75, 75.8, 76.6, 77.2], "前浪长": [26.9, 27.6, 28.3, 29, 29.7, 30.4, 31.1], "后浪长": [37.1, 37.9, 38.7, 39.5, 40.3, 41.1, 41.9]}}]}]};
+var sel = {cat:null, style:null, size:null};
+
+function init() {
+  var cg = document.getElementById('catGrid');
+  DATA.categories.forEach(function(c) {
+    var d = document.createElement('div');
+    d.className = 'cat-card';
+    d.innerHTML = '<div class="cat-icon">' + c.icon + '</div><div class="cat-name">' + c.name + '</div><div class="cat-desc">' + c.desc + '</div>';
+    d.onclick = function() {
+      document.querySelectorAll('.cat-card').forEach(function(e){e.classList.remove('active')});
+      d.classList.add('active');
+      sel.cat = c;
+      sel.style = null;
+      sel.size = null;
+      showStyles();
+    };
+    cg.appendChild(d);
+  });
+}
+
+function showStyles() {
+  document.getElementById('step2').classList.remove('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('result').classList.remove('show');
+  var sg = document.getElementById('styleGrid');
+  sg.innerHTML = '';
+  sel.cat.styles.forEach(function(s) {
+    var d = document.createElement('div');
+    d.className = 'style-card';
+    var sizeRange = s.sizes[0] + ' ~ ' + s.sizes[s.sizes.length-1];
+    d.innerHTML = '<div class="style-name">' + s.name + '</div><div class="style-sizes">' + sizeRange + '</div>';
+    d.onclick = function() {
+      document.querySelectorAll('.style-card').forEach(function(e){e.classList.remove('active')});
+      d.classList.add('active');
+      sel.style = s;
+      sel.size = null;
+      showSizes();
+    };
+    sg.appendChild(d);
+  });
+  document.getElementById('step2').scrollIntoView({behavior:'smooth'});
+}
+
+function showSizes() {
+  document.getElementById('step3').classList.remove('hidden');
+  document.getElementById('result').classList.remove('show');
+  var szg = document.getElementById('sizeGrid');
+  szg.innerHTML = '';
+  sel.style.sizes.forEach(function(sz) {
+    var d = document.createElement('div');
+    d.className = 'size-chip';
+    d.textContent = sz;
+    d.onclick = function() {
+      document.querySelectorAll('.size-chip').forEach(function(e){e.classList.remove('active')});
+      d.classList.add('active');
+      sel.size = sz;
+      showResult();
+    };
+    szg.appendChild(d);
+  });
+  document.getElementById('step3').scrollIntoView({behavior:'smooth'});
+}
+
+function showResult() {
+  var s = sel.style;
+  var szIdx = s.sizes.indexOf(sel.size);
+  var tbl = document.getElementById('resultTable');
+  var html = '<thead><tr><th>部位</th>';
+  s.sizes.forEach(function(sz, i) {
+    html += '<th' + (i===szIdx?' class="highlight"':'') + '>' + sz + '</th>';
+  });
+  html += '</tr></thead><tbody>';
+  s.parts.forEach(function(part) {
+    var vals = s.data[part] || [];
+    html += '<tr><td>' + part + '</td>';
+    vals.forEach(function(v, i) {
+      var display = (v==='' || v===null) ? '—' : v;
+      html += '<td' + (i===szIdx?' class="highlight"':'') + '>' + display + '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+
+  document.getElementById('resultTitle').textContent = sel.cat.icon + ' ' + sel.cat.name + ' · ' + s.name;
+  document.getElementById('resultMeta').textContent = '选中尺码：' + sel.size + ' | 码位范围：' + s.sizes[0] + '~' + s.sizes[s.sizes.length-1];
+
+  // Jump table
+  var jt = document.getElementById('jumpTable');
+  var jr = DATA.jump_rule;
+  var jh = '<thead><tr><th>部位</th>';
+  jr.sizes.forEach(function(sz){jh+='<th>'+sz+'</th>'});
+  jh += '</tr></thead><tbody>';
+  Object.keys(jr.rows).forEach(function(part) {
+    jh += '<tr><td>'+part+'</td>';
+    jr.rows[part].forEach(function(v) {
+      jh += '<td'+(v===0?' class="zero"':'')+'>'+(v>0?'+'+v:v)+'</td>';
+    });
+    jh += '</tr>';
+  });
+  jh += '</tbody>';
+  jt.innerHTML = jh;
+
+  document.getElementById('result').classList.add('show');
+  setTimeout(function() {
+    document.getElementById('result').scrollIntoView({behavior:'smooth'});
+  }, 100);
+}
+
+function resetAll() {
+  sel = {cat:null, style:null, size:null};
+  document.querySelectorAll('.cat-card,.style-card,.size-chip').forEach(function(e){e.classList.remove('active')});
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('step1').scrollIntoView({behavior:'smooth'});
+}
+
+// === 一键复制尺码 ===
+function copySizeData() {
+  var s = sel.style;
+  if (!s || !sel.size) return;
+  var szIdx = s.sizes.indexOf(sel.size);
+  var lines = [];
+  lines.push(sel.cat.name + ' - ' + s.name + ' | 尺码：' + sel.size);
+  lines.push('━━━━━━━━━━━━━━━━━━');
+  s.parts.forEach(function(part) {
+    var vals = s.data[part] || [];
+    var v = vals[szIdx];
+    if (v !== '' && v !== null && v !== undefined) {
+      lines.push(part + '：' + v + 'cm');
+    }
+  });
+  lines.push('━━━━━━━━━━━━━━━━━━');
+  lines.push('⚠️ 胸围一定要前4后5，否则审版不通过');
+  var text = lines.join('\n');
+  
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('✅ 尺码已复制，可直接发给商家');
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('✅ 尺码已复制，可直接发给商家'); } catch(e) { showToast('复制失败，请手动复制'); }
+    document.body.removeChild(ta);
+  }
+}
+
+function showToast(msg) {
+  var t = document.getElementById('copyToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// === 留言交流区 ===
+var comments = [];
+try { comments = JSON.parse(localStorage.getItem('size_comments') || '[]'); } catch(e) { comments = []; }
+
+function previewImage(input) {
+  var preview = document.getElementById('cImgPreview');
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+    reader.onload = function(e) { preview.src = e.target.result; preview.classList.remove('hidden'); };
+    reader.readAsDataURL(input.files[0]);
+  } else {
+    preview.classList.add('hidden');
+  }
+}
+
+function submitComment() {
+  var storeId = document.getElementById('cStoreId').value.trim();
+  var fit = document.getElementById('cFit').value;
+  var cat = document.getElementById('cCategory').value;
+  var desc = document.getElementById('cDesc').value.trim();
+  var imgPreview = document.getElementById('cImgPreview');
+  var hasImg = !imgPreview.classList.contains('hidden');
+  
+  if (!storeId) { showToast('⚠️ 请填写店铺ID'); document.getElementById('cStoreId').focus(); return; }
+  if (!fit) { showToast('⚠️ 请选择版型偏好'); document.getElementById('cFit').focus(); return; }
+  if (!cat) { showToast('⚠️ 请选择主要品类'); document.getElementById('cCategory').focus(); return; }
+  
+  var now = new Date();
+  var timeStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  
+  var body = '品类：' + cat + '\n版型：' + fit;
+  if (desc) body += '\n说明：' + desc;
+  if (hasImg) body += '\n（附有参考图）';
+  
+  var comment = {
+    storeId: storeId,
+    fit: fit,
+    category: cat,
+    desc: desc,
+    hasImg: hasImg,
+    imgData: hasImg ? imgPreview.src : '',
+    time: timeStr,
+    body: body
+  };
+  
+  comments.unshift(comment);
+  try { localStorage.setItem('size_comments', JSON.stringify(comments)); } catch(e) {}
+  
+  // 清空表单
+  document.getElementById('cStoreId').value = '';
+  document.getElementById('cFit').value = '';
+  document.getElementById('cCategory').value = '';
+  document.getElementById('cDesc').value = '';
+  document.getElementById('cImage').value = '';
+  imgPreview.classList.add('hidden');
+  
+  renderComments();
+  showToast('✅ 留言提交成功，买手会尽快对接版师');
+  document.getElementById('commentSection').scrollIntoView({behavior:'smooth'});
+}
+
+function renderComments() {
+  var list = document.getElementById('commentList');
+  if (comments.length === 0) {
+    list.innerHTML = '<div class="empty-comments">还没有留言，快来第一个留言吧~</div>';
+    return;
+  }
+  var html = '';
+  comments.forEach(function(c, idx) {
+    html += '<div class="comment-item">';
+    html += '<div class="ci-header"><div class="ci-store">🏪 店铺 ' + c.storeId + '</div><div class="ci-time">' + c.time + '</div></div>';
+    html += '<div class="ci-tags">';
+    html += '<span class="ci-tag">' + c.category + '</span>';
+    html += '<span class="ci-tag green">' + c.fit + '版型</span>';
+    html += '</span>';
+    html += '</div>';
+    html += '<div class="ci-body">' + (c.desc || '（无补充说明）');
+    if (c.hasImg && c.imgData) html += '<br><img class="img-preview" style="margin-top:6px" src="' + c.imgData + '">';
+    html += '</div>';
+    html += '<span class="ci-copy" onclick="copyComment(' + idx + ')">📋 复制留言</span>';
+    html += '<span class="ci-del" onclick="delComment(' + idx + ')">🗑 删除</span>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function copyComment(idx) {
+  var c = comments[idx];
+  var text = '【尺码需求留言】\n店铺ID：' + c.storeId + '\n品类：' + c.category + '\n版型：' + c.fit;
+  if (c.desc) text += '\n说明：' + c.desc;
+  
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() { showToast('✅ 留言内容已复制'); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('✅ 留言内容已复制'); } catch(e) { showToast('复制失败'); }
+    document.body.removeChild(ta);
+  }
+}
+
+function delComment(idx) {
+  if (!confirm('确定删除这条留言吗？')) return;
+  comments.splice(idx, 1);
+  try { localStorage.setItem('size_comments', JSON.stringify(comments)); } catch(e) {}
+  renderComments();
+  showToast('已删除');
+}
+
+init();
+renderComments();
+</script>
+</body>
+</html>
